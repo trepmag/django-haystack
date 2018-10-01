@@ -192,6 +192,7 @@ class SolrSearchBackend(BaseSearchBackend):
         fields="",
         highlight=False,
         facets=None,
+        facets_pivot=None,
         date_facets=None,
         query_facets=None,
         narrow_queries=None,
@@ -280,6 +281,10 @@ class SolrSearchBackend(BaseSearchBackend):
                     kwargs[
                         "f.%s.facet.%s" % (facet_field, key)
                     ] = self.conn._from_python(value)
+
+        if facets_pivot is not None:
+            kwargs["facet"] = "on"
+            kwargs["facet.pivot"] = [','.join(v) for k, v in facets_pivot.items()]
 
         if date_facets is not None:
             kwargs["facet"] = "on"
@@ -486,6 +491,7 @@ class SolrSearchBackend(BaseSearchBackend):
                 "fields": raw_results.facets.get("facet_fields", {}),
                 "dates": raw_results.facets.get("facet_dates", {}),
                 "queries": raw_results.facets.get("facet_queries", {}),
+                "pivot": raw_results.facets.get("facet_pivot", {}),
             }
 
             for key in ["fields"]:
@@ -907,6 +913,9 @@ class SolrSearchQuery(BaseSearchQuery):
 
         if self.facets:
             search_kwargs["facets"] = self.facets
+
+        if self.facets_pivot:
+            search_kwargs["facets_pivot"] = self.facets_pivot
 
         if self.fields:
             search_kwargs["fields"] = self.fields

@@ -411,6 +411,12 @@ class SearchQuerySet(object):
         clone.query.add_field_facet(field, **options)
         return clone
 
+    def facet_pivot(self, name, fields):
+        """Adds facet pivot to a query for the provided pivot."""
+        clone = self._clone()
+        clone.query.add_field_facet_pivot(name, fields)
+        return clone
+
     def within(self, field, point_1, point_2):
         """Spatial: Adds a bounding box search to the query."""
         clone = self._clone()

@@ -96,6 +96,7 @@ class FacetedSearchMixin(SearchMixin):
 
     form_class = FacetedSearchForm
     facet_fields = None
+    facet_pivots = {}
 
     def get_form_kwargs(self):
         kwargs = super(FacetedSearchMixin, self).get_form_kwargs()
@@ -111,6 +112,8 @@ class FacetedSearchMixin(SearchMixin):
         qs = super(FacetedSearchMixin, self).get_queryset()
         for field in self.facet_fields:
             qs = qs.facet(field)
+        for pivot_name, pivot_fields in self.facet_pivots.items():
+            qs = qs.facet_pivot(pivot_name, pivot_fields)
         return qs
 
 

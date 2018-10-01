@@ -489,6 +489,7 @@ class BaseSearchQuery(object):
         self.end_offset = None
         self.highlight = False
         self.facets = {}
+        self.facets_pivot = {}
         self.date_facets = {}
         self.query_facets = []
         self.narrow_queries = set()
@@ -554,6 +555,9 @@ class BaseSearchQuery(object):
 
         if self.facets:
             kwargs["facets"] = self.facets
+
+        if self.facets_pivot:
+            kwargs["facets_pivot"] = self.facets_pivot
 
         if self.date_facets:
             kwargs["date_facets"] = self.date_facets
@@ -952,6 +956,18 @@ class BaseSearchQuery(object):
         )
         self.facets[field_name] = options.copy()
 
+    def add_field_facet_pivot(self, name, fields):
+        """Adds a regular facet on a field."""
+        from haystack import connections
+
+        field_names = []
+        for field in fields:
+            field_names.append(
+                connections[self._using].get_unified_index().get_facet_fieldname(field)
+            )
+        self.facets_pivot[name] = field_names
+
+
     def add_date_facet(self, field, start_date, end_date, gap_by, gap_amount=1):
         """Adds a date-based facet on a field."""
         from haystack import connections
@@ -1064,6 +1080,7 @@ class BaseSearchQuery(object):
         clone.highlight = self.highlight
         clone.stats = self.stats.copy()
         clone.facets = self.facets.copy()
+        clone.facets_pivot = self.facets_pivot.copy()
         clone.date_facets = self.date_facets.copy()
         clone.query_facets = self.query_facets[:]
         clone.narrow_queries = self.narrow_queries.copy()
