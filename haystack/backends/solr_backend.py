@@ -60,6 +60,8 @@ class SolrSearchBackend(BaseSearchBackend):
         "/",
     )
 
+    _facets_pivot = None
+
     def __init__(self, connection_alias, **connection_options):
         super(SolrSearchBackend, self).__init__(connection_alias, **connection_options)
 
@@ -285,6 +287,7 @@ class SolrSearchBackend(BaseSearchBackend):
         if facets_pivot is not None:
             kwargs["facet"] = "on"
             kwargs["facet.pivot"] = [','.join(v) for k, v in facets_pivot.items()]
+            self._facets_pivot = facets_pivot
 
         if date_facets is not None:
             kwargs["facet"] = "on"
@@ -491,7 +494,7 @@ class SolrSearchBackend(BaseSearchBackend):
                 "fields": raw_results.facets.get("facet_fields", {}),
                 "dates": raw_results.facets.get("facet_dates", {}),
                 "queries": raw_results.facets.get("facet_queries", {}),
-                "pivot": raw_results.facets.get("facet_pivot", {}),
+                "pivots": {},
             }
 
             for key in ["fields"]:
@@ -504,6 +507,10 @@ class SolrSearchBackend(BaseSearchBackend):
                             facets[key][facet_field][1::2],
                         )
                     )
+
+            for k, v in self._facets_pivot.items():
+                result_pivot_key = ','.join(v)
+                facets['pivots'][k] = raw_results.facets.get("facet_pivot", {})[result_pivot_key]
 
         if self.include_spelling and hasattr(raw_results, "spellcheck"):
             try:
