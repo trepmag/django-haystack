@@ -60,7 +60,7 @@ class SolrSearchBackend(BaseSearchBackend):
         "/",
     )
 
-    _facets_pivot = None
+    _facets_pivot = {}
 
     def __init__(self, connection_alias, **connection_options):
         super(SolrSearchBackend, self).__init__(connection_alias, **connection_options)
