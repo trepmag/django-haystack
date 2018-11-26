@@ -60,9 +60,8 @@ class SolrSearchBackend(BaseSearchBackend):
         "/",
     )
 
-    _facets_pivot = {}
-
     def __init__(self, connection_alias, **connection_options):
+        self._facets_pivot = {}
         super(SolrSearchBackend, self).__init__(connection_alias, **connection_options)
 
         if "URL" not in connection_options:
@@ -284,6 +283,7 @@ class SolrSearchBackend(BaseSearchBackend):
                         "f.%s.facet.%s" % (facet_field, key)
                     ] = self.conn._from_python(value)
 
+        self._facets_pivot = {}
         if facets_pivot is not None:
             kwargs["facet"] = "on"
             kwargs["facet.pivot"] = [','.join(v) for k, v in facets_pivot.items()]
